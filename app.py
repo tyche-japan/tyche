@@ -15,13 +15,19 @@ def index():
         file = request.files['file']
         if file:
             df = pd.read_excel(file)
-            plt.figure(figsize=(6, 6))
-            df.sum().plot.pie(autopct='%1.1f%%')
-            img = io.BytesIO()
-            plt.savefig(img, format='png')
-            img.seek(0)
-            chart = base64.b64encode(img.getvalue()).decode()
+            labels = df.iloc[:, 0]  # 첫 번째 열: 항목 이름
+            sizes = df.iloc[:, 1]   # 두 번째 열: 값
+
+            fig, ax = plt.subplots()
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            chart = base64.b64encode(buf.getvalue()).decode('utf-8')
+            buf.close()
             plt.close()
+
     return render_template('index.html', chart=chart)
 
 if __name__ == '__main__':
